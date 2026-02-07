@@ -91,6 +91,7 @@ async def play_next(ctx):
         return
 
     url, title = music_queues[guild_id].popleft()
+    vc.current_track = title
 
     ffmpeg_opts = {
         "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
@@ -371,6 +372,31 @@ async def ask(ctx, prompt: str):
 
     text = response.choices[0].message.content.strip()
     await ctx.followup.send(text)
+
+@bot.slash_command(description="Show the currently playing song")
+async def nowplaying(ctx):
+    vc = ctx.guild.voice_client
+    guild_id = ctx.guild.id
+
+    if vc is None or not vc.is_connected():
+        await ctx.respond("I am not in a voice channel.")
+        return
+
+    if not vc.is_playing():
+        await ctx.respond("Nothing is playing right now.")
+        return
+
+    if guild_id not in music_queues:
+        await ctx.respond("Nothing is playing right now.")
+        return
+
+    current = getattr(vc, "current_track", None)
+
+    if current is None:
+        await ctx.respond("Nothing is playing right now.")
+        return
+
+    await ctx.respond(f"🎶 Now playing: **{current}**")
 
 
 
