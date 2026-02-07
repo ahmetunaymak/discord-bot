@@ -404,4 +404,5 @@ async def nowplaying(ctx):
 
 
 
-bot.run("DISCORD_TOKEN")
+bot.run(os.environ["DISCORD_TOKEN"])
+
